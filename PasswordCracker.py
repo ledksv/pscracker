@@ -413,7 +413,7 @@ def try_decodings(s):
             alpha_ratio = sum(c.isalpha() for c in dec) / max(len(dec), 1)
             if (dec != s and _looks_like_text(dec, min_len=6)
                     and alpha_ratio >= 0.6 and not dec.startswith("$")
-                    and _en_score(dec) > _en_score(s)):
+                    and _en_score(dec) >= _en_score(s)):
                 found.append(("ROT13", dec))
     except Exception: pass
 
