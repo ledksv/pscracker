@@ -19,15 +19,39 @@ import urllib.parse
 import urllib.request
 from pathlib import Path
 
-BANNER = r"""
-  ____                                     _  ____                _
- |  _ \ __ _ ___ _____      _____  _ __ __| |/ ___|_ __ __ _  ___| | _____ _ __
- | |_) / _` / __/ __\ \ /\ / / _ \| '__/ _` | |   | '__/ _` |/ __| |/ / _ \ '__|
- |  __/ (_| \__ \__ \\ V  V / (_) | | | (_| | |__| | | | (_| | (__|   <  __/ |
- |_|   \__,_|___/___/ \_/\_/ \___/|_|  \__,_|\____|_|  \__,_|\___|_|\_\___|_|
+def _gen_banner():
+    try:
+        r1 = subprocess.run(
+            ["figlet", "-f", "small", "-w", "200", "PASSWORD CRACKER"],
+            capture_output=True, text=True, timeout=3,
+        )
+        r2 = subprocess.run(
+            ["figlet", "-f", "small", "-w", "200", "MADE BY L3dSec"],
+            capture_output=True, text=True, timeout=3,
+        )
+        if r1.returncode == 0 and r1.stdout.strip():
+            return (
+                "\n" + r1.stdout +
+                r2.stdout +
+                "\n  Paste a hash, encoding, SSH key, or file — get the password.\n"
+                "  Supports: MD5 · SHA · NTLM · bcrypt · Kerberos · Base64 · ZIP · PDF · KeePass · and more.\n"
+            )
+    except Exception:
+        pass
+    return (
+        "\n"
+        "  ____  __   ____  ____  _   _  ___  ____  ____     ____  ____  __   ___  _  _  ____  ____ \n"
+        " (  _ \\/ _\\ / ___)(  __)( \\_/ )/ _ \\(  _ \\(    \\   / ___)(  _ \\/ _\\ / __)( )/ )(  __)(  _ \\\n"
+        "  )   /    \\\\___ \\ ) _)  \\   /( (_) ))   / ) D (  ( (__   )   /    \\( (__  )  (  ) _)  )   /\n"
+        " (___)\\_/\\_/(____/(____)  \\_/   \\___/(__\\_)(____/   \\____)(__)  \\_/\\_/ \\___)(__)\\__)(____(__\\_)\n"
+        "\n"
+        "  MADE BY L3dSec\n"
+        "\n"
+        "  Paste a hash, encoding, SSH key, or file — get the password.\n"
+        "  Supports: MD5 · SHA · NTLM · bcrypt · Kerberos · Base64 · ZIP · PDF · KeePass · and more.\n"
+    )
 
-  Universal Password Cracker — paste anything, get the password.
-"""
+BANNER = _gen_banner()
 
 OUTPUT_FILE = "cracked.txt"
 
