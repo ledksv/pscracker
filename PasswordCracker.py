@@ -247,6 +247,20 @@ def _cleanup(*paths):
 # ─────────────────────────────────────────────────────────────────────────────
 # Detection helpers
 # ─────────────────────────────────────────────────────────────────────────────
+_EN_WORDS = frozenset([
+    "the","and","for","with","this","that","from","have","been","will","your",
+    "they","about","which","when","were","there","their","what","said","each",
+    "would","could","other","into","than","then","here","some","time","look",
+    "only","come","its","over","think","also","back","after","use","two","how",
+    "our","work","first","well","way","even","new","want","because","any",
+    "these","give","most","flag","key","test","pass","secret","name","data",
+    "hash","user","admin","root","file","code","token","login","pwd",
+])
+
+def _en_score(s):
+    """Count recognisable English words in s (3+ chars)."""
+    return sum(1 for w in re.findall(r'[a-zA-Z]{3,}', s.lower()) if w in _EN_WORDS)
+
 def _looks_like_text(s, min_len=4):
     """True if s is likely a real human-readable string (not binary garbage)."""
     if not s or len(s) < min_len:
@@ -391,16 +405,15 @@ def try_decodings(s):
         _add("HTML entities", html.unescape(s))
     except Exception: pass
 
-    # ROT13 — only flag if:
-    #   - result is mostly alphabetic (not a hash or hex string rotated)
-    #   - result doesn't start with $ (would indicate a hash-like format)
-    #   - original doesn't look like a known hash (no point ROT13-ing a hash)
+    # ROT13 — only flag if the decoded result contains more recognisable English
+    # words than the input (prevents false-positives on plain English strings).
     try:
         if not s.startswith("$") and not _looks_like_known_hash(s):
             dec = codecs.decode(s, "rot_13")
             alpha_ratio = sum(c.isalpha() for c in dec) / max(len(dec), 1)
             if (dec != s and _looks_like_text(dec, min_len=6)
-                    and alpha_ratio >= 0.6 and not dec.startswith("$")):
+                    and alpha_ratio >= 0.6 and not dec.startswith("$")
+                    and _en_score(dec) > _en_score(s)):
                 found.append(("ROT13", dec))
     except Exception: pass
 
